@@ -1,6 +1,7 @@
 package ico
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"image"
@@ -28,6 +29,7 @@ type icondirentry struct {
 func newIcondir() icondir {
 	var id icondir
 	id.imageType = 1
+	id.numImages = 1
 	return id
 }
 
@@ -42,6 +44,13 @@ func newIcondirentry() icondirentry {
 func Encode(w io.Writer, m image.Image) error {
 	id := newIcondir()
 	ide := newIcondirentry()
+
+	pngbb := new(bytes.Buffer)
+	pngwriter := bufio.NewWriter(pngbb)
+	png.Encode(pngwriter, m)
+	pngwriter.Flush()
+	ide.sizeInBytes = uint32(len(pngbb.Bytes()))
+
 	bounds := m.Bounds()
 	ide.imageWidth = uint8(bounds.Dx())
 	ide.imageHeight = uint8(bounds.Dy())
@@ -52,7 +61,7 @@ func Encode(w io.Writer, m image.Image) error {
 	binary.Write(bb, binary.LittleEndian, ide)
 
 	w.Write(bb.Bytes())
-	//TODO write to memory first, write size to icondirentry
-	png.Encode(w, m)
+	w.Write(pngbb.Bytes())
+
 	return e
 }
