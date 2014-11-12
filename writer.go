@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"image"
-	"image/color"
 	"image/draw"
 	"image/png"
 	"io"
@@ -46,26 +45,8 @@ func newIcondirentry() icondirentry {
 
 func Encode(w io.Writer, im image.Image) error {
 	b := im.Bounds()
-	//TODO retain colors
-	mask := image.NewAlpha(b)
-	for x := 0; x < b.Dx(); x++ {
-		for y := 0; y < b.Dy(); y++ {
-			r, _, _, a := im.At(x, y).RGBA()
-			if a == 65535 {
-				if r == 0 {
-					mask.SetAlpha(x, y, color.Alpha{255})
-				} else {
-					mask.SetAlpha(x, y, color.Alpha{255 - uint8(r)})
-				}
-			} else {
-				mask.SetAlpha(x, y, color.Alpha{0})
-			}
-		}
-	}
 	m := image.NewRGBA(b)
-	draw.Draw(m, b, image.Transparent, image.ZP, draw.Src)
-	//	draw.DrawMask(m, b, image.NewUniform(color.RGBA{255, 0, 0, 255}), image.ZP, mask, b.Min, draw.Over)
-	draw.DrawMask(m, b, image.Black, image.ZP, mask, b.Min, draw.Over)
+	draw.Draw(m, b, im, b.Min, draw.Src)
 
 	id := newIcondir()
 	ide := newIcondirentry()
