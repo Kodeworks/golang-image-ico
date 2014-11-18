@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"image"
 	"image/draw"
 	"image/png"
@@ -50,7 +49,6 @@ func Encode(w io.Writer, im image.Image) error {
 
 	id := newIcondir()
 	ide := newIcondirentry()
-	fmt.Println(m.ColorModel())
 
 	pngbb := new(bytes.Buffer)
 	pngwriter := bufio.NewWriter(pngbb)
